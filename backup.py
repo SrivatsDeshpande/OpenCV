@@ -1,5 +1,6 @@
+from os import name
 import cv2
-
+import time
 thres = 0.50 # Threshold to detect object
 
 
@@ -51,7 +52,7 @@ def tts(names): # Function for converting text to speech
     elif len(names)==1:
         text = "The object is a "+str(names[0])
         engine.say(text)
-        
+
 
     
     engine.runAndWait()
@@ -63,26 +64,47 @@ cap.set(3,1280)
 cap.set(4,720)
 #cap.set(10,70)
 
-while True:
-    
+
+
+
+def detect():
+    start = time.time()
     success,img = cap.read()
     objectInfo = getObjects(img, objects = ['person','bottle','dog','door','chair','mirror','backpack','eye glasses','traffic light','mouse','cell phone','potted plant'])
     #print(objectInfo)
     obj = list(objectInfo)
     names = []
+    accuracy = {}
+    for i in obj:
+        if i[2] not in accuracy:
+            accuracy[i[1]] = i[2]
+    #print(accuracy)
     if len(obj)>1:
         
         for i in range(len(obj)):
             names.append(obj[i][1])
-        
+        end = time.time()
         
         
     elif len(obj)==1:
         
         names.append(obj[0][1])
+        end = time.time()
+    else:
+        end = time.time()
     names = unique(names)
-    tts(names)
     
+    #tts(names)
+    
+    return end-start,names,accuracy
+
+
+
+        
+if __name__ == '__main__':       
+    while True:
+        detect()
+        
     
 
         
