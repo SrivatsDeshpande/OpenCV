@@ -19,18 +19,7 @@ net.setInputScale(1.0/ 127.5)
 net.setInputMean((127.5, 127.5, 127.5))
 net.setInputSwapRB(True)
 
-def getObjects(img,objects = []):
-    classIds, confs, bbox = net.detect(img,confThreshold=thres, nmsThreshold=0.2)
-    
-    if len(objects)==0: objects = classNames
-    objectInfo = []
-    if len(classIds) != 0:
-        for classId, confidence,box in zip(classIds.flatten(),confs.flatten(),bbox):
-            className = classNames[classId-1]
-            if className in objects:
-                objectInfo.append([box,className,confidence])
-              
-    return  objectInfo
+
 
 def unique(names):
     unique_names = []
@@ -39,8 +28,9 @@ def unique(names):
             unique_names.append(i)
     return unique_names
 
+import pyttsx3
 def tts(names): # Function for converting text to speech
-    import pyttsx3
+    
     
     engine = pyttsx3.init()
     if len(names)>1:
@@ -52,31 +42,50 @@ def tts(names): # Function for converting text to speech
     elif len(names)==1:
         text = "The object is a "+str(names[0])
         engine.say(text)
-
+    
+        
 
     
     engine.runAndWait()
-    #engine.stop()
+    
+    engine.stop()
     
 
 cap = cv2.VideoCapture(0)
 cap.set(3,1280)
 cap.set(4,720)
-#cap.set(10,70)
+cap.set(5,240)
 
-
-
-
+def getObjects(img,objects = []):
+    
+    classIds, confs, bbox = net.detect(img,confThreshold=thres, nmsThreshold=0.2)
+    
+    if len(objects)==0: objects = classNames
+    objectInfo = []
+    if len(classIds) != 0:
+        for classId, confidence,box in zip(classIds.flatten(),confs.flatten(),bbox):
+            className = classNames[classId-1]
+            if className in objects:
+                objectInfo.append([box,className,confidence])
+              
+    return  objectInfo
+def capture():
+    
+    success,img = cap.read()
+    
+    objectInfo = getObjects(img, objects = ['person','bottle','dog','door','chair','mirror','backpack','eye glasses','traffic light','mouse','cell phone','potted plant'])
+    
+    return objectInfo
+    
 def detect():
     start = time.time()
-    success,img = cap.read()
-    objectInfo = getObjects(img, objects = ['person','bottle','dog','door','chair','mirror','backpack','eye glasses','traffic light','mouse','cell phone','potted plant'])
-    #print(objectInfo)
+    objectInfo = capture()
+    
     obj = list(objectInfo)
     names = []
     accuracy = {}
     for i in obj:
-        if i[2] not in accuracy:
+        if i[1] not in accuracy.keys():
             accuracy[i[1]] = i[2]
     #print(accuracy)
     if len(obj)>1:
@@ -93,17 +102,19 @@ def detect():
     else:
         end = time.time()
     names = unique(names)
+    #print(names)
     
-    #tts(names)
+    tts(names)
     
     return end-start,names,accuracy
-
-
-
-        
+    
+    
 if __name__ == '__main__':       
     while True:
+        capture()
+        
         detect()
+        
         
     
 
