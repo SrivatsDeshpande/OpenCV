@@ -1,3 +1,4 @@
+
 from os import name
 import cv2
 import time
@@ -33,7 +34,9 @@ def tts(names): # Function for converting text to speech
     
     
     engine = pyttsx3.init()
-    if len(names)>1:
+    if names == 'Your device is up and running ':
+        engine.say('Your device is up and running ')
+    elif len(names)>1:
         text = ['The objects are ']
         for i in names:
             i = i.split(',')
@@ -43,18 +46,19 @@ def tts(names): # Function for converting text to speech
         text = "The object is a "+str(names[0])
         engine.say(text)
     
-        
+    
+    
 
     
     engine.runAndWait()
     
     engine.stop()
-    
+tts('Your device is up and running ')
 
 cap = cv2.VideoCapture(0)
 cap.set(3,1280)
 cap.set(4,720)
-cap.set(5,240)
+
 
 def getObjects(img,objects = []):
     
@@ -77,7 +81,7 @@ def capture():
     
     return objectInfo
     
-def detect():
+def detect_object():
     start = time.time()
     objectInfo = capture()
     
@@ -87,7 +91,7 @@ def detect():
     for i in obj:
         if i[1] not in accuracy.keys():
             accuracy[i[1]] = i[2]
-    #print(accuracy)
+    
     if len(obj)>1:
         
         for i in range(len(obj)):
@@ -102,18 +106,16 @@ def detect():
     else:
         end = time.time()
     names = unique(names)
-    #print(names)
+    
     
     tts(names)
-    
+    time.sleep(3)
     return end-start,names,accuracy
     
     
 if __name__ == '__main__':       
     while True:
-        capture()
-        
-        detect()
+        detect_object()
         
         
     
